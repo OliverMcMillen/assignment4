@@ -1,0 +1,26 @@
+{
+  "name": "assignment4",
+  "version": "1.0.0",
+  "description": "Assignment 4 Project for COSC 436",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OliverMcMillen/assignment4.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/OliverMcMillen/assignment4/issues"
+  },
+  "homepage": "https://github.com/OliverMcMillen/assignment4#readme",
+  "dependencies": {
+    "express": "^5.1.0",
+    "mysql2": "^3.14.1",
+    "socket.io": "^4.8.1"
+  }
+}

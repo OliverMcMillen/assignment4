@@ -1,0 +1,13 @@
+DROP TABLE IF EXISTS players;
+DROP TABLE IF EXISTS users;
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    screenname VARCHAR(50) NOT NULL UNIQUE,
+    login_time DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE players (
+    x_player VARCHAR(50),
+    o_player VARCHAR(50)
+);
