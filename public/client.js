@@ -30,41 +30,65 @@ function submitUsername() {
 }
 
 function updateList(userList) {
-  const container = document.getElementById("user-list-container");
-  container.innerHTML = "";
+  const userTableBody = document.getElementById("user-table-body");
+  const idleTable = document.getElementById("idle-table");
 
-  const playing = userList.filter(u => u.status.startsWith("Playing"));
-  const waiting = userList.filter(u => u.status.startsWith("Waiting"));
-  const idle = userList.filter(u => u.status === "Idle");
+  userTableBody.innerHTML = "";
+  idleTable.innerHTML = "";
 
-  if (playing.length > 0) {
-    container.innerHTML += `<h3>Playing</h3>`;
-    playing.forEach(u => {
-      container.innerHTML += `<div class="user-row"><span>${u.screenName}</span><span>${u.status}</span></div>`;
-    });
-  }
+  const processedPairs = new Set();
 
-  if (waiting.length > 0) {
-    container.innerHTML += `<h3>Waiting for Opponent</h3>`;
-    waiting.forEach(u => {
-      // Only show JOIN button if it’s not yourself
-      if (u.screenName !== currentUsername) {
-        container.innerHTML += `
-          <div class="user-row">
-            <span>${u.screenName}</span>
-            <button onclick="joinGame('${u.screenName}')">JOIN</button>
-          </div>
-        `;
+  // Render both waiting and playing in the X/O table
+  userList.forEach(user => {
+    const { screenName, status, symbol } = user;
+    const row = document.createElement("tr");
+    const xCell = document.createElement("td");
+    const oCell = document.createElement("td");
+
+    if (status.startsWith("Waiting as ")) {
+      // waiting
+      if (symbol === 'X') {
+        xCell.textContent = screenName;
+        oCell.innerHTML = `<button onclick="joinGame('${screenName}')">JOIN</button>`;
+      } else {
+        oCell.textContent = screenName;
+        xCell.innerHTML = `<button onclick="joinGame('${screenName}')">JOIN</button>`;
       }
-    });
-  }
+    } else if (status.startsWith("Playing vs ")) {
+      // playing
+      const opponent = status.split("Playing vs ")[1];
+      // avoid double-rows
+      const key = [screenName, opponent].sort().join('|');
+      if (processedPairs.has(key)) return;
+      processedPairs.add(key);
 
-  if (idle.length > 0) {
-    container.innerHTML += `<h3>Idle</h3>`;
-    idle.forEach(u => {
-      container.innerHTML += `<div class="user-row"><span>${u.screenName}</span><span>${u.status}</span></div>`;
-    });
-  }
+      if (symbol === 'X') {
+        xCell.textContent = screenName;
+        oCell.textContent = opponent;
+      } else {
+        xCell.textContent = opponent;
+        oCell.textContent = screenName;
+      }
+    } else {
+      return; // skip idle here
+    }
+
+    row.appendChild(xCell);
+    row.appendChild(oCell);
+    userTableBody.appendChild(row);
+  });
+
+  // Render idle players below
+  userList.forEach(user => {
+    if (user.status === 'Idle') {
+      const row = document.createElement("tr");
+      const cell = document.createElement("td");
+      cell.colSpan = 2;
+      cell.textContent = user.screenName;
+      row.appendChild(cell);
+      idleTable.appendChild(row);
+    }
+  });
 }
 
 function promptNewGame() {

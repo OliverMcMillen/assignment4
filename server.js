@@ -2,8 +2,6 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
-const db = require('./db');
-
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
@@ -125,18 +123,25 @@ io.on('connection', (socket) => {
         return;
       }
 
-      // Format into [{ screenName, status }]
+      // Format into [{ screenName, status, symbol }]
       const userList = activeSockets.map(user => {
         let status = "Idle";
+        let symbol = null;
         players.forEach(game => {
           if (game.x_player === user.screenName) {
-            status = game.o_player ? `Playing vs ${game.o_player}` : "Waiting as X";
+            symbol = 'X';
+            status = game.o_player
+              ? `Playing vs ${game.o_player}`
+              : "Waiting as X";
           }
           if (game.o_player === user.screenName) {
-            status = game.x_player ? `Playing vs ${game.x_player}` : "Waiting as O";
+            symbol = 'O';
+            status = game.x_player
+              ? `Playing vs ${game.x_player}`
+              : "Waiting as O";
           }
         });
-        return { screenName: user.screenName, status };
+        return { screenName: user.screenName, status, symbol };
       });
 
       // Send updated list to the user who just logged in
@@ -147,7 +152,7 @@ io.on('connection', (socket) => {
     });
   }
 
-  
+
 });
 
 const PORT = 3000;
