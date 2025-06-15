@@ -3,7 +3,7 @@ let currentUsername = "";
 
 // Socket react on screenname-unavailable
 socket.on("screenname-unavailable", () => {
-  alert("That username is already in use.");
+  usernameErrorOverlay();
 });
 
 // Socket react on LOGIN-OK
@@ -20,11 +20,27 @@ socket.on("UPDATED-USER-LIST-AND-STATUS", (userList) => {
   updateList(userList);
 });
 
+
+// Socket react on UPDATED-USER-LIST-AND-STATUS
+socket.on("PLAY", (playerList) => {
+  console.log("PLAY received. Players:", playerList);
+});
+
+// Show how to play information
+function showHowToPlay() {
+
+  document.getElementById("helpOverlay").style.display = "flex";
+  // Close Help Overlay
+  document.getElementById("closeHelp").addEventListener("click", () => {
+      document.getElementById("helpOverlay").style.display = "none";
+  });
+}
+
 // Submit username function
 function submitUsername() {
   const username = document.getElementById("username").value.trim();
   if (username.length === 0) {
-    alert("Username cannot be blank.");
+   usernameErrorOverlay();
     return;
   }
 
@@ -34,6 +50,13 @@ function submitUsername() {
   socket.emit("TO-SERVER LOGIN", username);
 }
 
+function usernameErrorOverlay(){
+    document.getElementById("usernameErrorOverlay").style.display = "flex";
+  // Close Help Overlay
+  document.getElementById("closeUsernameErr").addEventListener("click", () => {
+      document.getElementById("usernameErrorOverlay").style.display = "none";
+  });
+}
 
 function promptNewGame() {
   document.getElementById("symbol-choice").style.display = "block";
@@ -74,10 +97,10 @@ function updateList(userList) {
       // waiting
       if (symbol === 'X') {
         xCell.textContent = screenName;
-        oCell.innerHTML = `<button onclick="joinGame('${screenName}')">JOIN</button>`;
+        oCell.innerHTML = `<a onclick="joinGame('${screenName}')">JOIN</a>`;
       } else {
         oCell.textContent = screenName;
-        xCell.innerHTML = `<button onclick="joinGame('${screenName}')">JOIN</button>`;
+        xCell.innerHTML = `<a onclick="joinGame('${screenName}')">JOIN</a>`;
       }
     } else if (status.startsWith("Playing vs ")) {
       // playing

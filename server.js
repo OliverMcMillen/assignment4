@@ -94,8 +94,8 @@ io.on('connection', (socket) => {
 
             // Send PLAY to both players
             const targetSockets = activeSockets.filter(u => [x, o].includes(u.screenName));
-            targetSockets.forEach(u => {
-              io.to(u.socketId).emit("PLAY", { xPlayer: x, oPlayer: o });
+            targetSockets.forEach(each => {
+              io.to(each.socketId).emit("PLAY", { xPlayer: x, oPlayer: o });
             });
           });
         });

@@ -11,10 +11,15 @@
   <div class="container">
     <h1>Tic-Tac-Toe</h1>
     <p>Developer: Oliver McMillen</p>
-    <p>Instructions: Login, Start a Game, or Join an Existing One.</p>
+    
+    <div id="help-section">
+      <a onclick="showHowToPlay()">How To Play</a>
+      <br><br>
+    </div>
 
     <div id="login-section">
       <input type="text" id="username" placeholder="Enter username" />
+      <br><br>
       <button onclick="submitUsername()">Submit</button>
     </div>
 
@@ -54,6 +59,30 @@
       </div>
     </div>
 
+        <!-- How To Overlay - Displayed regardless of session status-->
+    <div class="overlay" id="helpOverlay">
+        <div class="overlay-content">
+            <span class="close-btn" id="closeHelp">[x]</span>
+            <h3>Welcome to the Tic-Tac-Toe game! Here’s how to play:</h3>
+            <p>1. Enter a unique username.</p>
+            <p>2. Click 'New Game' to choose your symbol (X or O).</p>
+            <p>3. If you choose X, you can wait for an opponent or play against O.</p>
+            <p>4. If you choose O, you can only play against X.</p>
+            <p>5. Click 'Join' next to a waiting player to start a game.</p>
+            <p>6. If you are waiting, you can start a new game at any time.</p>
+            <p>7. If you are playing, you can only play against your opponent.</p>
+            <p>8. Enjoy the game!</p>
+        </div>
+    </div>
+
+        <!-- How To Overlay - Displayed regardless of session status-->
+    <div class="overlay" id="usernameErrorOverlay">
+        <div class="overlay-content">
+            <span class="close-btn" id="closeUsernameErr">[x]</span>
+            <h3>Error!</h3>
+            <p>Username is taken already or is blank. Please try again.</p>
+        </div>
+    </div>
 
   </div>
 
