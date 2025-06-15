@@ -102,6 +102,31 @@ io.on('connection', (socket) => {
       });
   });
 
+  // MOVE event handler
+  socket.on('MOVE', ({ screenName, cell }) => {
+    const opponentQuery = `
+      SELECT x_player, o_player FROM players
+      WHERE x_player = ? OR o_player = ?
+      LIMIT 1
+    `;
+    dbCon.query(opponentQuery, [screenName, screenName], (err, results) => {
+      if (err || results.length === 0) {
+        console.error("Error finding opponent:", err);
+        return;
+      }
+
+      const row = results[0];
+      const opponent = (row.x_player === screenName) ? row.o_player : row.x_player;
+
+      if (!opponent) return;
+
+      const opponentSocket = activeSockets.find(u => u.screenName === opponent);
+      if (opponentSocket) {
+        io.to(opponentSocket.socketId).emit('MOVE', { cell });
+      }
+    });
+  });
+
   socket.on('disconnect', () => {
     const index = activeSockets.findIndex(u => u.socketId === socket.id);
     if (index !== -1) {

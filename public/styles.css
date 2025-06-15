@@ -83,3 +83,19 @@ a {
     right: 10px;
     cursor: pointer;
 }
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 80px);
+  grid-template-rows: repeat(3, 80px);
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.cell {
+  width: 80px;
+  height: 80px;
+  font-size: 2em;
+  cursor: pointer;
+}

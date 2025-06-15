@@ -1,5 +1,10 @@
 const socket = io();
 let currentUsername = "";
+let xPlayer = "";
+let oPlayer = "";
+let mySymbol = "";
+let opponentSymbol = "";
+let isMyTurn = false;
 
 // Socket react on screenname-unavailable
 socket.on("screenname-unavailable", () => {
@@ -20,10 +25,49 @@ socket.on("UPDATED-USER-LIST-AND-STATUS", (userList) => {
   updateList(userList);
 });
 
+// Socket react on PLAY
+socket.on('PLAY', ({ xPlayer: xP, oPlayer: oP }) => {
+  xPlayer = xP;
+  oPlayer = oP;
 
-// Socket react on UPDATED-USER-LIST-AND-STATUS
-socket.on("PLAY", (playerList) => {
-  console.log("PLAY received. Players:", playerList);
+  const gameSection = document.getElementById('game-section');
+  const gameInfo = document.getElementById('game-info');
+  const board = document.getElementById('board');
+
+  gameSection.style.display = 'block';
+  board.innerHTML = ''; // clear previous board
+
+  mySymbol = (currentUsername === xPlayer) ? 'X' : 'O';
+  opponentSymbol = (mySymbol === 'X') ? 'O' : 'X';
+  isMyTurn = (mySymbol === 'X'); // X always starts
+
+  updateTurn();
+
+  for (let i = 1; i <= 9; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'cell';
+    btn.id = `cell-${i}`;
+    btn.textContent = ""; // clear existing text
+    btn.addEventListener('click', () => {
+      if (btn.textContent || !isMyTurn) return;
+      btn.textContent = mySymbol;
+      socket.emit('MOVE', { screenName: currentUsername, cell: i });
+      isMyTurn = false;
+      updateTurn();
+    });
+    board.appendChild(btn);
+  }
+});
+
+
+// Socket react on MOVE
+socket.on('MOVE', ({ cell }) => {
+  const cellBtn = document.getElementById(`cell-${cell}`);
+  if (cellBtn && !cellBtn.textContent) {
+    cellBtn.textContent = opponentSymbol;
+    isMyTurn = true;
+    updateTurn();
+  }
 });
 
 // Show how to play information
@@ -73,6 +117,12 @@ function joinGame(opponent) {
 
   // Socket emit JOIN to server with current username and opponent
   socket.emit("JOIN", { screenName: currentUsername, opponent });
+}
+
+
+function updateTurn() {
+  const gameInfo = document.getElementById('game-info');
+  gameInfo.textContent = `X: ${xPlayer} | O: ${oPlayer} | Turn: ${isMyTurn ? mySymbol : opponentSymbol}`;
 }
 
 
