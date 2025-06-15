@@ -1,11 +1,12 @@
+const socket = io();
 let currentUsername = "";
 
-const socket = io();
-
+// Socket react on screenname-unavailable
 socket.on("screenname-unavailable", () => {
   alert("That username is already in use.");
 });
 
+// Socket react on LOGIN-OK
 socket.on("LOGIN-OK", (userList) => {
   console.log("LOGIN-OK received. User list:", userList);
 
@@ -14,10 +15,12 @@ socket.on("LOGIN-OK", (userList) => {
   updateList(userList);
 });
 
+// Socket react on UPDATED-USER-LIST-AND-STATUS
 socket.on("UPDATED-USER-LIST-AND-STATUS", (userList) => {
   updateList(userList);
 });
 
+// Submit username function
 function submitUsername() {
   const username = document.getElementById("username").value.trim();
   if (username.length === 0) {
@@ -26,9 +29,31 @@ function submitUsername() {
   }
 
   currentUsername = username;
+
+  // Socket emit TO-SERVER LOGIN to server with the username
   socket.emit("TO-SERVER LOGIN", username);
 }
 
+
+function promptNewGame() {
+  document.getElementById("symbol-choice").style.display = "block";
+}
+
+// Socket emit NEW-GAME to server with username and chosen 'X' or 'O' symbol
+function startNewGame(symbol) {
+  document.getElementById("symbol-choice").style.display = "none";
+  socket.emit("NEW-GAME", { screenName: currentUsername, symbol });
+}
+
+function joinGame(opponent) {
+  if (opponent === currentUsername) return;
+
+  // Socket emit JOIN to server with current username and opponent
+  socket.emit("JOIN", { screenName: currentUsername, opponent });
+}
+
+
+// Upodate the user list in the UI
 function updateList(userList) {
   const userTableBody = document.getElementById("user-table-body");
   const idleTable = document.getElementById("idle-table");
@@ -38,7 +63,7 @@ function updateList(userList) {
 
   const processedPairs = new Set();
 
-  // Render both waiting and playing in the X/O table
+  // Display both waiting and playing in the X/O table
   userList.forEach(user => {
     const { screenName, status, symbol } = user;
     const row = document.createElement("tr");
@@ -57,7 +82,7 @@ function updateList(userList) {
     } else if (status.startsWith("Playing vs ")) {
       // playing
       const opponent = status.split("Playing vs ")[1];
-      // avoid double-rows
+      
       const key = [screenName, opponent].sort().join('|');
       if (processedPairs.has(key)) return;
       processedPairs.add(key);
@@ -70,7 +95,7 @@ function updateList(userList) {
         oCell.textContent = screenName;
       }
     } else {
-      return; // skip idle here
+      return;
     }
 
     row.appendChild(xCell);
@@ -78,7 +103,7 @@ function updateList(userList) {
     userTableBody.appendChild(row);
   });
 
-  // Render idle players below
+  // Display idle players
   userList.forEach(user => {
     if (user.status === 'Idle') {
       const row = document.createElement("tr");
@@ -91,16 +116,3 @@ function updateList(userList) {
   });
 }
 
-function promptNewGame() {
-  document.getElementById("symbol-choice").style.display = "block";
-}
-
-function startNewGame(symbol) {
-  document.getElementById("symbol-choice").style.display = "none";
-  socket.emit("NEW-GAME", { screenName: currentUsername, symbol });
-}
-
-function joinGame(opponent) {
-  if (opponent === currentUsername) return;
-  socket.emit("JOIN", { screenName: currentUsername, opponent });
-}

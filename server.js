@@ -16,17 +16,14 @@ io.on('connection', (socket) => {
   console.log(`New connection: ${socket.id}`);
 
   socket.on('TO-SERVER LOGIN', (screenName) => {
-    if (!screenName || screenName.trim() === "") {
-      return; // extra guard
-    }
 
-    // Check if screen name is already used (in memory)
+    // Check if screen name is already taken
     if (activeSockets.find(user => user.screenName === screenName)) {
       socket.emit("screenname-unavailable");
       return;
     }
 
-    // Check if it's in the DB already
+    // Check if screenname is in DB already
     dbCon.query("SELECT * FROM users WHERE screenname = ?", [screenName], (err, result) => {
       if (err) {
         console.error("DB error during login check:", err);
@@ -36,7 +33,7 @@ io.on('connection', (socket) => {
       if (result.length > 0) {
         socket.emit("screenname-unavailable");
       } else {
-        // Add to DB
+        // Add screenname to DB
         dbCon.query("INSERT INTO users (screenname) VALUES (?)", [screenName], (insertErr) => {
           if (insertErr) {
             console.error("DB insert error:", insertErr);
@@ -45,7 +42,7 @@ io.on('connection', (socket) => {
 
           console.log(`User: '${screenName}' logged in with socket ID: ${socket.id}`);
 
-          // Track the user in memory
+          // add user to active sockets
           activeSockets.push({ screenName, socketId: socket.id });
 
           // Send the LOGIN-OK response
