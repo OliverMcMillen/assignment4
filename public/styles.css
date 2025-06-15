@@ -19,3 +19,18 @@ body {
   text-align: center;
   margin-top: 60px;
 }
+
+#user-list-container {
+  margin: 20px auto;
+  padding: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  text-align: left;
+}
+
+.user-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}

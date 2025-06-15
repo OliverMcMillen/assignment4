@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Tic-Tac-Toe Game</title>
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
   <div class="container">
     <h1>Tic-Tac-Toe</h1>
@@ -15,9 +17,29 @@
       <input type="text" id="username" placeholder="Enter username" />
       <button onclick="submitUsername()">Submit</button>
     </div>
+
+
+    <div id="main-content" style="display:none;">
+      <h2>Players</h2>
+      <div id="user-list-container">
+
+      </div>
+
+      <div id="new-game-container">
+        <button onclick="promptNewGame()">NEW GAME</button>
+        <div id="symbol-choice" style="display: none;">
+          <p>Choose your symbol:</p>
+          <button onclick="startNewGame('X')">X</button>
+          <button onclick="startNewGame('O')">O</button>
+        </div>
+      </div>
+    </div>
+
+
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="client.js"></script>
 </body>
+
 </html>
