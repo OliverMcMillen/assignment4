@@ -53,38 +53,6 @@ socket.on('PLAY', ({ xPlayer: xP, oPlayer: oP }) => {
       if (btn.textContent || !isMyTurn || gameEnded) return;
       btn.textContent = mySymbol;
 
-      const boardState = Array(10).fill('');
-      for (let k = 1; k <= 9; k++) {
-        boardState[k] = document.getElementById(`cell-${k}`).textContent;
-      }
-
-      const winCombos = [
-        [1,2,3], [4,5,6], [7,8,9],
-        [1,4,7], [2,5,8], [3,6,9],
-        [1,5,9], [3,5,7]
-      ];
-
-      const isWin = winCombos.some(([a, b, c]) =>
-        boardState[a] === mySymbol &&
-        boardState[b] === mySymbol &&
-        boardState[c] === mySymbol
-      );
-
-      if (isWin) {
-        gameEnded = true;
-        document.getElementById('game-info').textContent += ` | ${mySymbol} wins!`;
-        socket.emit("END-GAME", { winner: mySymbol, screenName: currentUsername });
-        return;
-      }
-
-      const isDraw = boardState.slice(1).every(cell => cell !== "");
-      if (isDraw) {
-        gameEnded = true;
-        document.getElementById('game-info').textContent += ` | It's a draw.`;
-        socket.emit("END-GAME", { winner: "D" });
-        return;
-      }
-
       socket.emit('MOVE', { screenName: currentUsername, cell: i });
       isMyTurn = false;
       updateTurn();
@@ -98,8 +66,56 @@ socket.on('PLAY', ({ xPlayer: xP, oPlayer: oP }) => {
 socket.on('MOVE', ({ cell }) => {
   const cellBtn = document.getElementById(`cell-${cell}`);
   if (cellBtn && !cellBtn.textContent) {
-    cellBtn.textContent = opponentSymbol;
-    isMyTurn = true;
+    // Determine if this move is made by the opponent or myself
+    const isOpponentMove = !isMyTurn;
+    const symbolToPlace = isOpponentMove ? opponentSymbol : mySymbol;
+    cellBtn.textContent = symbolToPlace;
+
+    const boardState = Array(10).fill('');
+    for (let k = 1; k <= 9; k++) {
+      boardState[k] = document.getElementById(`cell-${k}`).textContent;
+    }
+
+    const winCombos = [
+      [1,2,3], [4,5,6], [7,8,9],
+      [1,4,7], [2,5,8], [3,6,9],
+      [1,5,9], [3,5,7]
+    ];
+
+    const isWin = winCombos.some(([a, b, c]) =>
+      boardState[a] === symbolToPlace &&
+      boardState[b] === symbolToPlace &&
+      boardState[c] === symbolToPlace
+    );
+
+    const isDraw = boardState.slice(1).every(cell => cell !== "");
+
+    if (isWin || isDraw) {
+      gameEnded = true;
+      const winnerMessage = isWin
+        ? `${symbolToPlace} wins the game!`
+        : "Game ended in a draw.";
+      document.getElementById('game-info').textContent += ` | ${winnerMessage}`;
+
+      for (let i = 1; i <= 9; i++) {
+        const btn = document.getElementById(`cell-${i}`);
+        if (btn && !btn.textContent) {
+          btn.disabled = true;
+        }
+      }
+
+      // Only emit END-GAME from the player who made the move
+      if (!isOpponentMove) {
+        socket.emit("END-GAME", {
+          winner: isWin ? symbolToPlace : "D",
+          screenName: currentUsername
+        });
+      }
+
+      return;
+    }
+
+    isMyTurn = isOpponentMove;
     updateTurn();
   }
 });
