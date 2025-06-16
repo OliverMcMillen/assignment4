@@ -127,6 +127,46 @@ io.on('connection', (socket) => {
     });
   });
 
+  // END-GAME event handler
+  socket.on("END-GAME", ({ winner, screenName }) => {
+    const cleanupQuery = `
+      DELETE FROM players
+      WHERE x_player = ? OR o_player = ?
+    `;
+
+    dbCon.query(cleanupQuery, [screenName, screenName], (err) => {
+      if (err) {
+        console.error("Error cleaning up game after END-GAME:", err);
+        return;
+      }
+
+      // Find the opponent
+      const opponentQuery = `
+        SELECT * FROM players
+        WHERE x_player = ? OR o_player = ?
+      `;
+      dbCon.query(opponentQuery, [screenName, screenName], (err, results) => {
+        let xPlayer = null;
+        let oPlayer = null;
+
+        if (results && results[0]) {
+          xPlayer = results[0].x_player;
+          oPlayer = results[0].o_player;
+        }
+
+        const targets = activeSockets.filter(u =>
+          u.screenName === screenName || u.screenName === xPlayer || u.screenName === oPlayer
+        );
+
+        targets.forEach(each => {
+          io.to(each.socketId).emit("END-GAME", { winner });
+        });
+
+        updateAndBroadcastUserList();
+      });
+    });
+  });
+
   socket.on('disconnect', () => {
     const index = activeSockets.findIndex(u => u.socketId === socket.id);
     if (index !== -1) {

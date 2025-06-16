@@ -5,6 +5,7 @@ let oPlayer = "";
 let mySymbol = "";
 let opponentSymbol = "";
 let isMyTurn = false;
+let gameEnded = false;
 
 // Socket react on screenname-unavailable
 socket.on("screenname-unavailable", () => {
@@ -49,8 +50,41 @@ socket.on('PLAY', ({ xPlayer: xP, oPlayer: oP }) => {
     btn.id = `cell-${i}`;
     btn.textContent = ""; // clear existing text
     btn.addEventListener('click', () => {
-      if (btn.textContent || !isMyTurn) return;
+      if (btn.textContent || !isMyTurn || gameEnded) return;
       btn.textContent = mySymbol;
+
+      const boardState = Array(10).fill('');
+      for (let k = 1; k <= 9; k++) {
+        boardState[k] = document.getElementById(`cell-${k}`).textContent;
+      }
+
+      const winCombos = [
+        [1,2,3], [4,5,6], [7,8,9],
+        [1,4,7], [2,5,8], [3,6,9],
+        [1,5,9], [3,5,7]
+      ];
+
+      const isWin = winCombos.some(([a, b, c]) =>
+        boardState[a] === mySymbol &&
+        boardState[b] === mySymbol &&
+        boardState[c] === mySymbol
+      );
+
+      if (isWin) {
+        gameEnded = true;
+        document.getElementById('game-info').textContent += ` | ${mySymbol} wins!`;
+        socket.emit("END-GAME", { winner: mySymbol, screenName: currentUsername });
+        return;
+      }
+
+      const isDraw = boardState.slice(1).every(cell => cell !== "");
+      if (isDraw) {
+        gameEnded = true;
+        document.getElementById('game-info').textContent += ` | It's a draw.`;
+        socket.emit("END-GAME", { winner: "D" });
+        return;
+      }
+
       socket.emit('MOVE', { screenName: currentUsername, cell: i });
       isMyTurn = false;
       updateTurn();
@@ -189,3 +223,20 @@ function updateList(userList) {
   });
 }
 
+socket.on("END-GAME", ({ winner }) => {
+  gameEnded = true;
+  const gameInfo = document.getElementById('game-info');
+  if (winner === "D") {
+    gameInfo.textContent += " | Game ended in a draw.";
+  } else {
+    gameInfo.textContent += ` | ${winner} wins the game!`;
+  }
+
+  // Disable all remaining buttons
+  for (let i = 1; i <= 9; i++) {
+    const btn = document.getElementById(`cell-${i}`);
+    if (btn && !btn.textContent) {
+      btn.disabled = true;
+    }
+  }
+});
