@@ -8,7 +8,7 @@ const io = new Server(server);
 const activeSockets = []; // stores {screenName, socketId}
 const dbCon = require('./db');
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname)));
 
 
 // Handle socket.io connections
