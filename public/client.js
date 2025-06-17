@@ -7,10 +7,12 @@ let opponentSymbol = "";
 let isMyTurn = false;
 let gameEnded = false;
 
+
 // Socket react on screenname-unavailable
 socket.on("screenname-unavailable", () => {
   usernameErrorOverlay();
 });
+
 
 // Socket react on LOGIN-OK
 socket.on("LOGIN-OK", (userList) => {
@@ -63,7 +65,7 @@ socket.on('PLAY', ({ xPlayer: xP, oPlayer: oP }) => {
     board.appendChild(btn);
   }
 
-  gameEnded  = false;
+  gameEnded = false;
 });
 
 
@@ -82,9 +84,9 @@ socket.on('MOVE', ({ cell }) => {
     }
 
     const winCombos = [
-      [1,2,3], [4,5,6], [7,8,9],
-      [1,4,7], [2,5,8], [3,6,9],
-      [1,5,9], [3,5,7]
+      [1, 2, 3], [4, 5, 6], [7, 8, 9],
+      [1, 4, 7], [2, 5, 8], [3, 6, 9],
+      [1, 5, 9], [3, 5, 7]
     ];
 
     const isWin = winCombos.some(([a, b, c]) =>
@@ -105,13 +107,13 @@ socket.on('MOVE', ({ cell }) => {
           btn.disabled = true;
         }
       }
-      
-       // Update game info
-        console.log("Emitting END-GAME event");
-        socket.emit("END-GAME", {
-          winner: isWin ? symbolToPlace : "D",
-          screenName: currentUsername
-        });
+
+      // Update game info
+      console.log("Emitting END-GAME event");
+      socket.emit("END-GAME", {
+        winner: isWin ? symbolToPlace : "D",
+        screenName: currentUsername
+      });
 
       return;
     }
@@ -121,21 +123,43 @@ socket.on('MOVE', ({ cell }) => {
   }
 });
 
+
+// Socket react on END-GAME
+socket.on("END-GAME", ({ winner }) => {
+  gameEnded = true;
+  const gameInfo = document.getElementById('game-info');
+  if (winner === "D") {
+    gameInfo.textContent = "Game ended in a draw.";
+  } else {
+    gameInfo.textContent = `${winner} won!`;
+  }
+
+  // Disable all remaining buttons
+  for (let i = 1; i <= 9; i++) {
+    const btn = document.getElementById(`cell-${i}`);
+    if (btn && !btn.textContent) {
+      btn.disabled = true;
+    }
+  }
+});
+
+
 // Show how to play information
 function showHowToPlay() {
-
   document.getElementById("helpOverlay").style.display = "flex";
   // Close Help Overlay
   document.getElementById("closeHelp").addEventListener("click", () => {
-      document.getElementById("helpOverlay").style.display = "none";
+    document.getElementById("helpOverlay").style.display = "none";
   });
 }
+
 
 // Submit username function
 function submitUsername() {
   const username = document.getElementById("username").value.trim();
+
   if (username.length === 0) {
-   usernameErrorOverlay();
+    usernameErrorOverlay();
     return;
   }
 
@@ -145,23 +169,28 @@ function submitUsername() {
   socket.emit("TO-SERVER LOGIN", username);
 }
 
-function usernameErrorOverlay(){
-    document.getElementById("usernameErrorOverlay").style.display = "flex";
+
+function usernameErrorOverlay() {
+  document.getElementById("usernameErrorOverlay").style.display = "flex";
+
   // Close Help Overlay
   document.getElementById("closeUsernameErr").addEventListener("click", () => {
-      document.getElementById("usernameErrorOverlay").style.display = "none";
+    document.getElementById("usernameErrorOverlay").style.display = "none";
   });
 }
+
 
 function promptNewGame() {
   document.getElementById("symbol-choice").style.display = "block";
 }
+
 
 // Socket emit NEW-GAME to server with username and chosen 'X' or 'O' symbol
 function startNewGame(symbol) {
   document.getElementById("symbol-choice").style.display = "none";
   socket.emit("NEW-GAME", { screenName: currentUsername, symbol });
 }
+
 
 function joinGame(opponent) {
   if (opponent === currentUsername) return;
@@ -206,7 +235,7 @@ function updateList(userList) {
     } else if (status.startsWith("Playing vs ")) {
       // playing
       const opponent = status.split("Playing vs ")[1];
-      
+
       const key = [screenName, opponent].sort().join('|');
       if (processedPairs.has(key)) return;
       processedPairs.add(key);
@@ -239,21 +268,3 @@ function updateList(userList) {
     }
   });
 }
-
-socket.on("END-GAME", ({ winner }) => {
-  gameEnded = true;
-  const gameInfo = document.getElementById('game-info');
-  if (winner === "D") {
-    gameInfo.textContent = "Game ended in a draw.";
-  } else {
-    gameInfo.textContent = `${winner} won!`;
-  }
-
-  // Disable all remaining buttons
-  for (let i = 1; i <= 9; i++) {
-    const btn = document.getElementById(`cell-${i}`);
-    if (btn && !btn.textContent) {
-      btn.disabled = true;
-    }
-  }
-});

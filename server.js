@@ -8,8 +8,8 @@ const io = new Server(server);
 const activeSockets = []; // stores {screenName, socketId}
 const dbCon = require('./db');
 
-// Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
+
 
 // Handle socket.io connections
 io.on('connection', (socket) => {
@@ -52,6 +52,7 @@ io.on('connection', (socket) => {
     });
   });
 
+
   // NEW-GAME
   socket.on("NEW-GAME", (data) => {
     const { screenName, symbol } = data;
@@ -67,6 +68,7 @@ io.on('connection', (socket) => {
       updateAndBroadcastUserList();
     });
   });
+
 
   // JOIN
   socket.on("JOIN", ({ screenName, opponent }) => {
@@ -106,6 +108,7 @@ io.on('connection', (socket) => {
     );
   });
 
+
   // MOVE event handler
   socket.on('MOVE', ({ screenName, cell }) => {
     const opponentQuery = `
@@ -131,9 +134,9 @@ io.on('connection', (socket) => {
     });
   });
 
+
   // END-GAME event handler
   socket.on("END-GAME", ({ winner, screenName }) => {
-
 
       // Find the opponent
       const opponentQuery = `
@@ -167,12 +170,12 @@ io.on('connection', (socket) => {
         console.error("Error cleaning up game after END-GAME:", err);
         return;
       }
-      console.log(`Game ended for ${screenName}. Winner: ${winner}`);
         updateAndBroadcastUserList();
       });
     });
   });
 
+  // Disconnection event handler
   socket.on('disconnect', () => {
     const index = activeSockets.findIndex(u => u.socketId === socket.id);
     if (index !== -1) {
@@ -182,7 +185,8 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Helper: get statuses and send to all clients
+
+  // Get status and send to all clients
   function updateAndBroadcastUserList() {
     // Get list of current players
     dbCon.query("SELECT * FROM players", (err, players) => {
@@ -191,7 +195,7 @@ io.on('connection', (socket) => {
         return;
       }
 
-      // Format into [{ screenName, status, symbol }]
+      // Create user list with status
       const userList = activeSockets.map(user => {
         let status = "Idle";
         let symbol = null;
@@ -219,8 +223,6 @@ io.on('connection', (socket) => {
       socket.broadcast.emit("UPDATED-USER-LIST-AND-STATUS", userList);
     });
   }
-
-
 });
 
 const PORT = 3000;
