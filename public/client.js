@@ -90,27 +90,23 @@ socket.on('MOVE', ({ cell }) => {
 
     const isDraw = boardState.slice(1).every(cell => cell !== "");
 
-    if (isWin || isDraw) {
+    if (isWin != '' || isDraw != '') {
       gameEnded = true;
-      const winnerMessage = isWin
-        ? `${symbolToPlace} wins the game!`
-        : "Game ended in a draw.";
-      document.getElementById('game-info').textContent += ` | ${winnerMessage}`;
 
+      // Disable all buttons
       for (let i = 1; i <= 9; i++) {
         const btn = document.getElementById(`cell-${i}`);
         if (btn && !btn.textContent) {
           btn.disabled = true;
         }
       }
-
-      // Only emit END-GAME from the player who made the move
-      if (!isOpponentMove) {
+      
+       // Update game info
+        console.log("Emitting END-GAME event");
         socket.emit("END-GAME", {
           winner: isWin ? symbolToPlace : "D",
           screenName: currentUsername
         });
-      }
 
       return;
     }

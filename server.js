@@ -129,16 +129,7 @@ io.on('connection', (socket) => {
 
   // END-GAME event handler
   socket.on("END-GAME", ({ winner, screenName }) => {
-    const cleanupQuery = `
-      DELETE FROM players
-      WHERE x_player = ? OR o_player = ?
-    `;
 
-    dbCon.query(cleanupQuery, [screenName, screenName], (err) => {
-      if (err) {
-        console.error("Error cleaning up game after END-GAME:", err);
-        return;
-      }
 
       // Find the opponent
       const opponentQuery = `
@@ -162,6 +153,17 @@ io.on('connection', (socket) => {
           io.to(each.socketId).emit("END-GAME", { winner });
         });
 
+            const cleanupQuery = `
+      DELETE FROM players
+      WHERE x_player = ? OR o_player = ?
+    `;
+
+    dbCon.query(cleanupQuery, [screenName, screenName], (err) => {
+      if (err) {
+        console.error("Error cleaning up game after END-GAME:", err);
+        return;
+      }
+      console.log(`Game ended for ${screenName}. Winner: ${winner}`);
         updateAndBroadcastUserList();
       });
     });
