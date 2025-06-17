@@ -47,6 +47,7 @@ socket.on('PLAY', ({ xPlayer: xP, oPlayer: oP }) => {
   for (let i = 1; i <= 9; i++) {
     const btn = document.createElement('button');
     btn.className = 'cell';
+    btn.disabled = false; // ensure buttons are enabled for the new game
     btn.id = `cell-${i}`;
     btn.textContent = ""; // clear existing text
     btn.addEventListener('click', () => {
@@ -59,6 +60,8 @@ socket.on('PLAY', ({ xPlayer: xP, oPlayer: oP }) => {
     });
     board.appendChild(btn);
   }
+
+  gameEnded  = false;
 });
 
 
@@ -239,9 +242,9 @@ socket.on("END-GAME", ({ winner }) => {
   gameEnded = true;
   const gameInfo = document.getElementById('game-info');
   if (winner === "D") {
-    gameInfo.textContent += " | Game ended in a draw.";
+    gameInfo.textContent = "Game ended in a draw.";
   } else {
-    gameInfo.textContent += ` | ${winner} wins the game!`;
+    gameInfo.textContent = `${winner} wins the game!`;
   }
 
   // Disable all remaining buttons

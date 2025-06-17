@@ -153,7 +153,7 @@ io.on('connection', (socket) => {
           io.to(each.socketId).emit("END-GAME", { winner });
         });
 
-            const cleanupQuery = `
+      const cleanupQuery = `
       DELETE FROM players
       WHERE x_player = ? OR o_player = ?
     `;
