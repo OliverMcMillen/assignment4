@@ -72,34 +72,38 @@ io.on('connection', (socket) => {
   socket.on("JOIN", ({ screenName, opponent }) => {
     if (screenName === opponent) return;
 
-    // Ensure both players are not already in a game
-    dbCon.query("DELETE FROM players WHERE x_player = ? OR o_player = ? OR x_player = ? OR o_player = ?",
-      [screenName, screenName, opponent, opponent], (err) => {
-        if (err) {
-          console.error("Error clearing old game:", err);
+    // Find the existing game where the opponent is waiting (as X or O)
+    dbCon.query(
+      "SELECT * FROM players WHERE (x_player = ? AND o_player IS NULL) OR (o_player = ? AND x_player IS NULL) LIMIT 1",
+      [opponent, opponent],
+      (err, results) => {
+        if (err || results.length === 0) {
+          console.error("No waiting game found for opponent:", err);
           return;
         }
 
-        // Assign roles (if opponent was waiting as X, you become O, etc.)
-        dbCon.query("SELECT * FROM players WHERE x_player = ? AND o_player IS NULL", [opponent], (err, results) => {
-          if (err) return;
+        const existing = results[0];
+        const gameId = existing.id;
+        const x = existing.x_player || screenName;
+        const o = existing.o_player || screenName;
 
-          const isOpponentX = results.length > 0;
-          const x = isOpponentX ? opponent : screenName;
-          const o = isOpponentX ? screenName : opponent;
+        // Update the existing game with the second player
 
           dbCon.query("INSERT INTO players (x_player, o_player) VALUES (?, ?)", [x, o], (err) => {
-            if (err) return;
-            updateAndBroadcastUserList();
+            if (err){
+            console.error("Error updating game with JOIN:", err);
+            return;
+          }
 
-            // Send PLAY to both players
-            const targetSockets = activeSockets.filter(u => [x, o].includes(u.screenName));
-            targetSockets.forEach(each => {
-              io.to(each.socketId).emit("PLAY", { xPlayer: x, oPlayer: o });
-            });
+          updateAndBroadcastUserList();
+
+          const targetSockets = activeSockets.filter(u => [x, o].includes(u.screenName));
+          targetSockets.forEach(each => {
+            io.to(each.socketId).emit("PLAY", { xPlayer: x, oPlayer: o });
           });
         });
-      });
+      }
+    );
   });
 
   // MOVE event handler
