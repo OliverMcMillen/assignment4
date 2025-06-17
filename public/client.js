@@ -18,6 +18,8 @@ socket.on("LOGIN-OK", (userList) => {
 
   document.getElementById("login-section").style.display = "none";
   document.getElementById("main-content").style.display = "block";
+  document.getElementById("current-login-status").style.display = "block";
+  document.getElementById("current-login-status").textContent = `Logged in as: ${currentUsername}`;
   updateList(userList);
 });
 
@@ -244,7 +246,7 @@ socket.on("END-GAME", ({ winner }) => {
   if (winner === "D") {
     gameInfo.textContent = "Game ended in a draw.";
   } else {
-    gameInfo.textContent = `${winner} wins the game!`;
+    gameInfo.textContent = `${winner} won!`;
   }
 
   // Disable all remaining buttons
