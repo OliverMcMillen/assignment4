@@ -79,13 +79,6 @@ io.on('connection', (socket) => {
       (err, results) => {
         if (err || results.length === 0) {
           console.error("No waiting game found for opponent:", err);
-    // Find the existing game where the opponent is waiting (as X or O)
-    dbCon.query(
-      "SELECT * FROM players WHERE (x_player = ? AND o_player IS NULL) OR (o_player = ? AND x_player IS NULL) LIMIT 1",
-      [opponent, opponent],
-      (err, results) => {
-        if (err || results.length === 0) {
-          console.error("No waiting game found for opponent:", err);
           return;
         }
 
