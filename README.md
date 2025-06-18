@@ -1,2 +1,3 @@
-# assignment4
-Assignment 4 Project for COSC 436
+# Read Me
+
+To create tables for database, import init.sql file from project directory into desired database to create tables. 

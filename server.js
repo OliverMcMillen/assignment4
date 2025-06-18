@@ -1,3 +1,12 @@
+/**
+ * Oliver McMillen
+ * E01809181
+ * COSC 436 - SEC 0
+ * 
+ * This file handles the server side logic for Tic Tac Toe game.
+ */
+
+
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -40,6 +49,7 @@ io.on('connection', (socket) => {
             return;
           }
 
+          // Log user login to console
           console.log(`User: '${screenName}' logged in with socket ID: ${socket.id}`);
 
           // add user to active sockets
@@ -53,7 +63,7 @@ io.on('connection', (socket) => {
   });
 
 
-  // NEW-GAME
+  // NEW-GAME event handler
   socket.on("NEW-GAME", (data) => {
     const { screenName, symbol } = data;
     const x = symbol === "X" ? screenName : null;
@@ -70,7 +80,7 @@ io.on('connection', (socket) => {
   });
 
 
-  // JOIN
+  // JOIN event handler
   socket.on("JOIN", ({ screenName, opponent }) => {
     if (screenName === opponent) return;
 
@@ -84,15 +94,13 @@ io.on('connection', (socket) => {
           return;
         }
 
-        const existing = results[0];
-        const gameId = existing.id;
-        const x = existing.x_player || screenName;
-        const o = existing.o_player || screenName;
+        // Get players from game data
+        const game = results[0];
+        const x = game.x_player || screenName;
+        const o = game.o_player || screenName;
 
-        // Update the existing game with the second player
-
-          dbCon.query("UPDATE players SET x_player = ?, o_player = ?", [x, o], (err) => {
-            if (err){
+        dbCon.query("UPDATE players SET x_player = ?, o_player = ?", [x, o], (err) => {
+          if (err) {
             console.error("Error updating game with JOIN:", err);
             return;
           }
@@ -123,6 +131,8 @@ io.on('connection', (socket) => {
       }
 
       const row = results[0];
+
+      // Determine opponent's screen name based on the current player status
       const opponent = (row.x_player === screenName) ? row.o_player : row.x_player;
 
       if (!opponent) return;
@@ -138,38 +148,42 @@ io.on('connection', (socket) => {
   // END-GAME event handler
   socket.on("END-GAME", ({ winner, screenName }) => {
 
-      // Find the opponent
-      const opponentQuery = `
+    // Find the opponent
+    const opponentQuery = `
         SELECT * FROM players
         WHERE x_player = ? OR o_player = ?
       `;
-      dbCon.query(opponentQuery, [screenName, screenName], (err, results) => {
-        let xPlayer = null;
-        let oPlayer = null;
+    dbCon.query(opponentQuery, [screenName, screenName], (err, results) => {
+      let xPlayer = null;
+      let oPlayer = null;
 
-        if (results && results[0]) {
-          xPlayer = results[0].x_player;
-          oPlayer = results[0].o_player;
-        }
+      // asssign xPlayer and oPlayer based on if results
+      if (results[0]) {
+        xPlayer = results[0].x_player;
+        oPlayer = results[0].o_player;
+      }
 
-        const targets = activeSockets.filter(u =>
-          u.screenName === screenName || u.screenName === xPlayer || u.screenName === oPlayer
-        );
 
-        targets.forEach(each => {
-          io.to(each.socketId).emit("END-GAME", { winner });
-        });
+      // Filters the list of active sockets to include only those whose screenName match  
+      const targets = activeSockets.filter(u =>
+        u.screenName === screenName || u.screenName === xPlayer || u.screenName === oPlayer
+      );
 
+      targets.forEach(each => {
+        io.to(each.socketId).emit("END-GAME", { winner });
+      });
+
+      // Remove players from players table
       const cleanupQuery = `
       DELETE FROM players
       WHERE x_player = ? OR o_player = ?
     `;
 
-    dbCon.query(cleanupQuery, [screenName, screenName], (err) => {
-      if (err) {
-        console.error("Error cleaning up game after END-GAME:", err);
-        return;
-      }
+      dbCon.query(cleanupQuery, [screenName, screenName], (err) => {
+        if (err) {
+          console.error("Error cleaning up game after END-GAME:", err);
+          return;
+        }
         updateAndBroadcastUserList();
       });
     });
@@ -195,10 +209,11 @@ io.on('connection', (socket) => {
         return;
       }
 
-      // Create user list with status
+      // Create user list with status for players both waiting and playing
       const userList = activeSockets.map(user => {
         let status = "Idle";
         let symbol = null;
+
         players.forEach(game => {
           if (game.x_player === user.screenName) {
             symbol = 'X';
@@ -225,7 +240,8 @@ io.on('connection', (socket) => {
   }
 });
 
+
 const PORT = 3000;
 server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`Server running on port: ${PORT}`);
 });
