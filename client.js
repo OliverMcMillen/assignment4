@@ -43,9 +43,9 @@ socket.on("UPDATED-USER-LIST-AND-STATUS", (userList) => {
 });
 
 // Socket react on PLAY
-socket.on('PLAY', ({ xPlayer: xPlayer, oPlayer: oPlayer }) => {
-  xPlayer = xPlayer;
-  oPlayer = oPlayer;
+socket.on('PLAY', ({ xPlayer: x, oPlayer: o }) => {
+  xPlayer = x;
+  oPlayer = o;
 
   const gameSection = document.getElementById('game-section');
   const gameInfo = document.getElementById('game-info');
