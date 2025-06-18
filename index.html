@@ -1,3 +1,10 @@
+<!-- 
+ Oliver McMillen
+ COSC 436 - SEC 0
+ E01809181
+ This file handles the server side logic for Tic Tac Toe game.
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -11,7 +18,7 @@
   <div class="container">
     <h1>Tic-Tac-Toe</h1>
     <p>Developer: Oliver McMillen</p>
-    
+
     <div id="help-section">
       <a onclick="showHowToPlay()">How To Play</a>
       <br><br>
@@ -24,10 +31,10 @@
     </div>
 
     <div id="current-login-status" style="display: none;">
-      </div>
+    </div>
 
 
-        <!-- Display active players and idle clients -->
+    <!-- Display active players and idle clients -->
     <div id="main-content" style="display:none;">
       <div id="user-list-container" style="display: flex; gap: 20px;">
         <div
@@ -53,7 +60,7 @@
       </div>
 
 
-        <!-- New Game Button -->
+      <!-- New Game Button -->
       <div style="margin-bottom: 15px;" id="new-game-container">
         <button onclick="promptNewGame()">NEW GAME</button>
         <div id="symbol-choice" style="display: none;">
@@ -64,33 +71,34 @@
       </div>
     </div>
 
-        <!-- How To Overlay -->
+    <!-- How To Overlay -->
     <div class="overlay" id="helpOverlay">
-        <div class="overlay-content">
-            <span class="close-btn" id="closeHelp">[x]</span>
-            <h3>Welcome to the Tic-Tac-Toe game! Here’s how to play:</h3>
-            <p>1. Enter a unique username.</p>
-            <p>2. Click 'New Game' to choose your symbol (X or O).</p>
-            <p>3. If you choose X or O, you will wait for an opponent to play against.</p>
-            <p>5. Click 'Join' next to a waiting player to start a game.</p>
-            <p>6. If you are idle, you can start a new game at any time.</p>
-            <p>7. Once a game finishes, start a new game by clicking 'New Game'</p>
-            <p>8. Enjoy the game!</p>
-        </div>
+      <div class="overlay-content">
+        <span class="close-btn" id="closeHelp">[x]</span>
+        <h3>Welcome to the Tic-Tac-Toe game! Here’s how to play:</h3>
+        <p>1. Enter a unique username.</p>
+        <p>2. Click 'New Game' to choose your symbol (X or O).</p>
+        <p>3. If you choose X or O, you will wait for an opponent to play against.</p>
+        <p>5. Click 'Join' next to a waiting player to start a game.</p>
+        <p>6. If you are idle, you can start a new game at any time.</p>
+        <p>7. Once a game finishes, start a new game by clicking 'New Game'</p>
+        <p>8. Enjoy the game!</p>
+      </div>
     </div>
 
     <div class="overlay" id="usernameErrorOverlay">
-        <div class="overlay-content">
-            <span class="close-btn" id="closeUsernameErr">[x]</span>
-            <h3>Error!</h3>
-            <p>Username is taken already or is blank. Please try again.</p>
-        </div>
+      <div class="overlay-content">
+        <span class="close-btn" id="closeUsernameErr">[x]</span>
+        <h3>Error!</h3>
+        <p>Username is taken already or is blank. Please try again.</p>
+      </div>
     </div>
 
+    <!-- Game and board section -->
     <div id="game-section" style="display: none;">
-  <div id="game-info"></div>
-  <div id="board" class="board"></div>
-</div>
+      <div id="game-info"></div>
+      <div id="board" class="board"></div>
+    </div>
 
   </div>
 

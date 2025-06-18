@@ -1,3 +1,11 @@
+/**
+ Oliver McMillen
+ COSC 436 - SEC 0
+ E01809181
+ CSS styling for Tic Tac Toe game.
+**/
+
+
 body {
   margin: 0;
   padding: 0;
@@ -35,7 +43,7 @@ body {
 
 .scrollable-box {
   flex: 1;
-  max-height: 300px;
+  max-height: 200px;
   overflow-y: auto;
   border: 1px solid #ccc;
   padding: 10px;
@@ -46,7 +54,7 @@ button {
   background-color: #2154cb;
   color: white;
   padding: 10px 20px;
-  border: none;
+  /* border: none; */
   border-radius: 5px;
   cursor: pointer;
 }
@@ -57,45 +65,46 @@ a {
 }
 
 .overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.3);
-    display: none;
-    justify-content: center;
-    align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  display: none;
+  justify-content: center;
+  align-items: center;
 }
 
 .overlay-content {
-    background: white;
-    padding: 30px;
-    width: auto;
-    max-width: 500px;
-    border-radius: 10px;
-    position: relative;
+  background: white;
+  padding: 30px;
+  width: auto;
+  max-width: 500px;
+  border-radius: 10px;
+  position: relative;
 }
 
 .close-btn {
-    position: absolute;
-    top: 8px;
-    right: 10px;
-    cursor: pointer;
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  cursor: pointer;
 }
 
 .board {
   display: grid;
-  grid-template-columns: repeat(3, 80px);
-  grid-template-rows: repeat(3, 80px);
+  grid-template-columns: 60px 60px 60px;
+  grid-template-rows: 60px 60px 60px;
   gap: 10px;
   justify-content: center;
   margin-top: 20px;
 }
 
 .cell {
-  width: 80px;
-  height: 80px;
-  font-size: 2em;
+  font-size: 35px;
+  padding: 8px;
+  background-color: rgb(28, 210, 255);
+  text-align: center;
   cursor: pointer;
 }

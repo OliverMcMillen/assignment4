@@ -1,3 +1,12 @@
+/**
+ * Oliver McMillen
+ * E01809181
+ * COSC 436 - SEC 0
+ * 
+ * This file handles the client side logic for Tic Tac Toe game.
+ */
+
+
 const socket = io();
 let currentUsername = "";
 let xPlayer = "";
@@ -18,7 +27,10 @@ socket.on("screenname-unavailable", () => {
 socket.on("LOGIN-OK", (userList) => {
   console.log("LOGIN-OK received. User list:", userList);
 
+  // Hide login section
   document.getElementById("login-section").style.display = "none";
+
+  // Show main content
   document.getElementById("main-content").style.display = "block";
   document.getElementById("current-login-status").style.display = "block";
   document.getElementById("current-login-status").textContent = `Logged in as: ${currentUsername}`;
@@ -31,33 +43,43 @@ socket.on("UPDATED-USER-LIST-AND-STATUS", (userList) => {
 });
 
 // Socket react on PLAY
-socket.on('PLAY', ({ xPlayer: xP, oPlayer: oP }) => {
-  xPlayer = xP;
-  oPlayer = oP;
+socket.on('PLAY', ({ xPlayer: xPlayer, oPlayer: oPlayer }) => {
+  xPlayer = xPlayer;
+  oPlayer = oPlayer;
 
   const gameSection = document.getElementById('game-section');
   const gameInfo = document.getElementById('game-info');
   const board = document.getElementById('board');
-
   gameSection.style.display = 'block';
-  board.innerHTML = ''; // clear previous board
 
+  // clear previous board
+  board.innerHTML = '';
+
+  // Set current user and opponent symbols
   mySymbol = (currentUsername === xPlayer) ? 'X' : 'O';
   opponentSymbol = (mySymbol === 'X') ? 'O' : 'X';
+
+  // Returns true if current user is 'X', false otherwise
   isMyTurn = (mySymbol === 'X'); // X always starts
 
   updateTurn();
 
+  // Display the playing board
   for (let i = 1; i <= 9; i++) {
     const btn = document.createElement('button');
     btn.className = 'cell';
-    btn.disabled = false; // ensure buttons are enabled for the new game
+
+    // ensure buttons are enabled for the new game
+    btn.disabled = false;
     btn.id = `cell-${i}`;
-    btn.textContent = ""; // clear existing text
+
+    // clear existing text
+    btn.textContent = "";
     btn.addEventListener('click', () => {
       if (btn.textContent || !isMyTurn || gameEnded) return;
       btn.textContent = mySymbol;
 
+      // Socket emit MOVE event 
       socket.emit('MOVE', { screenName: currentUsername, cell: i });
       isMyTurn = false;
       updateTurn();
@@ -73,6 +95,7 @@ socket.on('PLAY', ({ xPlayer: xP, oPlayer: oP }) => {
 socket.on('MOVE', ({ cell }) => {
   const cellBtn = document.getElementById(`cell-${cell}`);
   if (cellBtn && !cellBtn.textContent) {
+
     // Determine if this move is made by the opponent or myself
     const isOpponentMove = !isMyTurn;
     const symbolToPlace = isOpponentMove ? opponentSymbol : mySymbol;
@@ -83,6 +106,7 @@ socket.on('MOVE', ({ cell }) => {
       boardState[k] = document.getElementById(`cell-${k}`).textContent;
     }
 
+    // Delcare winning combinations
     const winCombos = [
       [1, 2, 3], [4, 5, 6], [7, 8, 9],
       [1, 4, 7], [2, 5, 8], [3, 6, 9],
@@ -95,6 +119,7 @@ socket.on('MOVE', ({ cell }) => {
       boardState[c] === symbolToPlace
     );
 
+    // Detect if draw
     const isDraw = boardState.slice(1).every(cell => cell !== "");
 
     if (isWin != '' || isDraw != '') {
@@ -224,26 +249,32 @@ function updateList(userList) {
     const oCell = document.createElement("td");
 
     if (status.startsWith("Waiting as ")) {
-      // waiting
+      // Display waiting status for X
       if (symbol === 'X') {
         xCell.textContent = screenName;
         oCell.innerHTML = `<a onclick="joinGame('${screenName}')">JOIN</a>`;
-      } else {
+      } 
+      // Set waiting status for O
+      else {
         oCell.textContent = screenName;
         xCell.innerHTML = `<a onclick="joinGame('${screenName}')">JOIN</a>`;
       }
     } else if (status.startsWith("Playing vs ")) {
-      // playing
       const opponent = status.split("Playing vs ")[1];
 
-      const key = [screenName, opponent].sort().join('|');
+      // Prevents duplicate games from showing in playing table
+      const key = [screenName, opponent].sort().join(' | ');
       if (processedPairs.has(key)) return;
       processedPairs.add(key);
 
+      // Display playing status for X
       if (symbol === 'X') {
         xCell.textContent = screenName;
         oCell.textContent = opponent;
-      } else {
+      } 
+      
+      // Display playing status for O
+      else {
         xCell.textContent = opponent;
         oCell.textContent = screenName;
       }
@@ -259,6 +290,7 @@ function updateList(userList) {
   // Display idle players
   userList.forEach(user => {
     if (user.status === 'Idle') {
+      // Create row and cell
       const row = document.createElement("tr");
       const cell = document.createElement("td");
       cell.colSpan = 2;
